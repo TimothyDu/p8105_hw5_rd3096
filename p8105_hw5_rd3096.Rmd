@@ -11,6 +11,7 @@ library(rvest)
 library(ggplot2)
 library(purrr)
 library(patchwork)
+library(broom)
 
 set.seed(1)
 
@@ -223,4 +224,71 @@ homicide_summary =
 
 homicide_summary
 ```
+
+we will perform the prop.test on the city of Baltimore, MD
+
+```{r}
+baltimore_data = 
+  homicide_summary %>% 
+  filter(city_state == "Baltimore,MD")
+
+baltimore_prop_test_result =
+  prop.test(
+    x = baltimore_data$total_unsolved,
+    n = baltimore_data$total_homides
+  )
+
+baltimore_prop_test_result 
+
+baltimore_summary = 
+  baltimore_prop_test_result %>% 
+  broom::tidy() %>% 
+  select(estimate, conf.low, conf.high)
+```
+
+we will run prop.test for each of the cities in our dataset
+
+```{r}
+homicide_prop_analysis = 
+  homicide_summary %>% 
+  mutate(
+    prop_test_result = map2(
+      total_unsolved,
+      total_homides,
+      ~ prop.test (x=.x,n=.y)),
+    tidy_result = map (prop_test_result, broom::tidy)
+    ) %>% 
+  select(city_state, tidy_result) %>% 
+  unnest() %>% 
+  select(city_state, estimate,conf.low, conf.high)
+  
+homicide_prop_analysis
+```
+
+Create a plot that shows the estimated and CIs for each city
+
+```{r}
+homicide_order = 
+  homicide_prop_analysis %>%
+  mutate(
+    city_state = reorder(city_state, estimate)
+    )
+
+homicide_plot =
+  homicide_order %>% 
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  coord_flip() +
+  labs(
+    title = "Proportion of Unsolved Homicides by City",
+    x = "City",
+    y = "Proportion of Unsolved Homicides",
+    caption = "Error bars represent 95% confidence intervals"
+  ) +
+  theme_minimal()
+
+homicide_plot
+```
+
 
