@@ -135,10 +135,21 @@ ggplot(
   theme_minimal()
 ```
 
-Complete the two plots based on the requirement
+Complete the two plots analyzing average estimate of mu_hat and true mu
 ```{r}
 estimate_results = map_dfr(mu_values, power_and_avemu)
 
 estimate_results 
+
+ggplot(estimate_results, aes(x = true_mu, y = avg_mu, color=true_mu)) +
+  geom_line() + 
+  scale_color_viridis_c()+
+  geom_point(size = 2) +     
+  labs(
+    title = "Average Estimate of μ̂ as a Function of True μ",
+    x = "True Mean (μ)",
+    y = "Average Estimate of μ̂"
+  ) +
+  theme_minimal()
 ```
 
