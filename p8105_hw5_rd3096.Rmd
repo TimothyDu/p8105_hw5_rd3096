@@ -82,12 +82,12 @@ ggplot(
 ## problem 2
 
 ```{r}
-simulation_test = function(n=30, mu,sigma=5) {
+simulation_test = function(mu, n=30,sigma=5) {
   
   x <- rnorm(n=30, mean = mu, sd = sigma)
 
   one_sample_ttest = t.test (x,mu = 0)
-  
+  simulation_test
   broom::tidy(one_sample_ttest)
 }
 
