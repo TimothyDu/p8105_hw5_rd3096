@@ -88,36 +88,40 @@ create one-sample t test function and power function
 ```{r}
 simulation_test = function(mu, n=30,sigma=5) {
   
-  x = rnorm(mean=mu,n=30, sd = sigma)
+  x = rnorm(n=30, mean=mu, sd = sigma)
 
-  one_sample_ttest = t.test (x,mu = 0)
-  simulation_test
-  broom::tidy(one_sample_ttest)
+  one_sample_ttest = t.test (x,mu = 0) %>% 
+    broom::tidy()
+  
+    tibble(
+      mu_hat = one_sample_ttest$estimate,
+      p_value = one_sample_ttest$p.value
+    )
 }
 
-calculate_power = function(mu, n = 30, sigma = 5) {
+power_and_avemu = function(mu, n = 30, sigma = 5) {
  
   simulation_test_results = map_dfr(1:5000, ~ simulation_test(mu, n = 30,sigma = 5))
   
-  power = mean(simulation_test_results$p.value < 0.05, na.rm = TRUE)
+  power = mean(simulation_test_results$p_value < 0.05, na.rm = TRUE)
+  
+  avg_mu_hat = mean(simulation_test_results$mu_hat, na.rm = TRUE)
   
   # Return a tibble with the true mu and calculated power
   tibble(
     true_mu = mu,
-    power = power
+    power = power,
+    avg_mu=avg_mu_hat
   )
 }
 
 mu_values = c(1, 2, 3, 4, 5, 6)
 
 # Calculate power for each value of mu
-power_results = map_dfr(mu_values, calculate_power)
+power_results = map_dfr(mu_values, power_and_avemu)
 
 power_results
-```
 
-Complete the two plots based on the requirement
-```{r}
 ggplot(
   power_results, aes(x = true_mu, y = power,color=true_mu)) +
   geom_line() +
@@ -129,5 +133,12 @@ ggplot(
     y = "Power"
   ) +
   theme_minimal()
+```
+
+Complete the two plots based on the requirement
+```{r}
+estimate_results = map_dfr(mu_values, power_and_avemu)
+
+estimate_results 
 ```
 
