@@ -182,3 +182,45 @@ The sample average of mu across tests for which the null hypothesis was rejected
 This plot shows the average mu only for the samples in which the null hypothesis was rejected (i.e., samples with p-values < 0.05). In this case, the average estimate of mu is systematically higher than the true mu, particularly for lower values of mu, this suggests an upward bias due to only including samples with significant results.
 
 This discrepancy occurs because we are only considering samples where the null hypothesis is rejected, which means we are selecting for samples where mu deviates sufficiently from 0 to yield a significant result. This introduces selection bias: when filtering for significant results, the sample means tend to be more extreme (in this case, higher than the true mu.
+
+## problem3
+
+we first read the homecide-data.csv file and describe this raw datafile
+
+```{r}
+homicide = read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/refs/heads/master/homicide-data.csv")
+
+str(homicide)
+```
+
+The raw data consists of 52,179 rows and 12 columns. Each row represents a unique homicide case, this dataset provides detailed information about each homicide case, including geographic data, victim demographics, and case dispositions. Some typical columns include unid, reported_date, victim_last and vitcim_first name. The more detailed information about these columns are listed as follow:
+uid: A unique identifier for each case (character).
+reported_date: The date the homicide was reported, in YYYYMMDD format (numeric).
+victim_last: The last name of the victim (character).
+victim_first: The first name of the victim (character).
+victim_race: The race of the victim (character).
+victim_age: The age of the victim (character; possibly contains missing or non-numeric values).
+victim_sex: The sex of the victim (character, likely "Male" or "Female").
+city: The city where the homicide occurred (character).
+state: The state abbreviation for where the homicide occurred (character).
+lat: The latitude of the homicide location (numeric).
+lon: The longitude of the homicide location (numeric).
+disposition: The outcome or current status of the case, e.g., "Closed without arrest," "Closed by arrest," "Open/No arrest" (character).
+
+Next step we will create a new variable and summarize within cities to get our desired total number of homicides and the number of unsolved homicides.
+
+```{r}
+homicide_summary = 
+  homicide %>% 
+  mutate(
+    city_state = str_c(city, ",", state)
+  ) %>% 
+  group_by(city_state) %>% 
+  summarize(
+    total_homides = n(),
+    total_unsolved= sum(disposition %in% c("Closed without arrest","Open/No arrest"))
+  )
+
+homicide_summary
+```
+
