@@ -82,12 +82,6 @@ ggplot(
 ## problem 2
 
 ```{r}
-n = 30
-sigma = 5
-alpha = 0.05
-mu = c(1, 2, 3, 4, 5, 6)
-num_simulations = 5000
-
 simulation_test = function(n=30, mu,sigma=5) {
   
   x <- rnorm(n=30, mean = mu, sd = sigma)
@@ -96,6 +90,7 @@ simulation_test = function(n=30, mu,sigma=5) {
   
   broom::tidy(one_sample_ttest)
 }
+
 
 ```
 
